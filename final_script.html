@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Interview</title>
+    <script>
+        const interviewQuestions = {
+            start: {
+                text: "1. Let's begin the interview. Who are you interviewing?",
+                options: [
+                    { text: "A 50+ year-old person", next: "techUsage" },
+                    { text: "A classmate", next: "techUsage" }
+                ]
+            },
+            techUsage: {
+                text: "2. How often do you interact with technology in your daily life?",
+                options: [
+                    { text: "Frequently", next: "goodTechIntro" },
+                    { text: "Occasionally", next: "goodTechIntro" },
+                    { text: "Rarely", next: "techFrustration" }
+                ]
+            },
+            goodTechIntro: {
+                text: "3. Can you name a specific feature or function of a technology that you enjoy using?",
+                next: "goodTechExperience"
+            },
+            goodTechExperience: {
+                text: "4. Did you find it easy to use right away, or did it take time to get used to?",
+                options: [
+                    { text: "Easy right away", next: "goodTechEasy" },
+                    { text: "Took time to get used to", next: "goodTechUnfriendly" }
+                ]
+            },
+            goodTechEasy: {
+                text: "5. What made it easy to learn and use? Was there a specific design choice that helped?",
+                next: "goodTechComparison"
+            },
+            goodTechUnfriendly: {
+                text: "6. What made it difficult to learn at first? Did you ever seek help to understand it?",
+                next: "goodTechComparison"
+            },
+            goodTechComparison: {
+                text: "7. Did this technology replace something that performed the same function? If so, how do they compare? If not, what made you start using it?",
+                next: "goodTechImpact"
+            },
+            goodTechImpact: {
+                text: "8. Would you say this technology saves you time or creates more work? Why? Have you ever encountered a situation where it made things harder?",
+                next: "goodTechMissing"
+            },
+            goodTechMissing: {
+                text: "9. Is there anything about this technology that you wish worked differently or was improved?",
+                next: "badTechIntro"
+            },
+            badTechIntro: {
+                text: "10. Can you name a specific feature or function of a technology that frustrates you or that you dislike using?",
+                next: "badTechExperience"
+            },
+            badTechExperience: {
+                text: "11. Did you dislike using it immediately, or did frustration grow over time?",
+                options: [
+                    { text: "Immediately", next: "badTechUnfriendly" },
+                    { text: "Grew over time", next: "badTechTooComplex" }
+                ]
+            },
+            badTechUnfriendly: {
+                text: "12. What made it difficult to use? Was it due to the design, unclear instructions, or expectations not being met?",
+                next: "badTechComparison"
+            },
+            badTechTooComplex: {
+                text: "13. Does this technology have too many features that make it overwhelming or hard to use?",
+                options: [
+                    { text: "Yes", next: "badTechTooComplexDetails" },
+                    { text: "No", next: "badTechComparison" }
+                ]
+            },
+            badTechTooComplexDetails: {
+                text: "14. What would you remove or simplify to make it more user-friendly?",
+                next: "badTechComparison"
+            },
+            badTechComparison: {
+                text: "15. Did this technology replace something that performed the same function? If so, how do they compare? If not, why did you try using it?",
+                next: "badTechImpact"
+            },
+            badTechImpact: {
+                text: "16. Has this technology ever directly caused a problem for you (e.g., wasted time, lost money, made work harder)? If so, how did you handle it?",
+                next: "badTechDependency"
+            },
+            badTechDependency: {
+                text: "17. Do you feel dependent on this technology? If it stopped working today, what would you do?",
+                next: "badTechMissing"
+            },
+            badTechMissing: {
+                text: "18. Is there something missing or that could improve this technology? If so, how would it improve your experience?",
+                next: "emotionsIntro"
+            },
+            emotionsIntro: {
+                text: "19. Do you feel frustrated with how quickly technology changes? Why or why not? Have you ever felt forced to upgrade something you were comfortable using?",
+                next: "bestWorstTech"
+            },
+            bestWorstTech: {
+                text: "20. What was the best technology you’ve ever used? What made it so great? Conversely, what was the worst technology you’ve ever used and why? What would you change about the worst one?",
+                next: "learningStyle"
+            },
+            learningStyle: {
+                text: "21. When learning a new technology, what is the biggest barrier for you—time, complexity, unclear instructions, or something else? How do you overcome these challenges?",
+                next: "techFuture"
+            },
+            techFuture: {
+                text: "22. If you could have any technology invented for you, what would it be and why? What problem would it solve?",
+                next: "finalThoughts"
+            },
+            finalThoughts: {
+                text: "23. If you could describe your overall relationship with technology in one sentence, what would it be? What advice would you give to someone designing the next generation of technology?",
+                next: "finished"
+            },
+            finished: {
+                text: "Say thank you",
+                next: null
+            }
+        };
+
+        let currentQuestion = "start";
+
+        function displayQuestion() {
+            const question = interviewQuestions[currentQuestion];
+            const questionContainer = document.getElementById("question");
+            questionContainer.innerText = question.text;
+
+            const optionsContainer = document.getElementById("options");
+            optionsContainer.innerHTML = "";
+
+            if (question.options) {
+                question.options.forEach(option => {
+                    const button = document.createElement("button");
+                    button.innerText = option.text;
+                    button.onclick = () => {
+                        currentQuestion = option.next;
+                        displayQuestion();
+                    };
+                    optionsContainer.appendChild(button);
+                });
+            } else {
+                const button = document.createElement("button");
+                button.innerText = "Next";
+                button.onclick = () => {
+                    currentQuestion = question.next;
+                    displayQuestion();
+                };
+                optionsContainer.appendChild(button);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", displayQuestion);
+    </script>
+</head>
+<body>
+    <h1>Interactive Interview</h1>
+    <p id="question"></p>
+    <div id="options"></div>
+</body>
+</html>
