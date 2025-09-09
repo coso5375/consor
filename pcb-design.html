@@ -6,24 +6,16 @@
   <title>PCB Design - Portfolio</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    .pdf-viewer {
-      margin: 2rem auto;
-      max-width: 1000px;
-      text-align: center;
-    }
     .pdf-frame {
       width: 100%;
-      height: 800px; /* Increased height for readability */
+      height: 800px;
       border: 1px solid #ccc;
       border-radius: 8px;
       margin-top: 1rem;
       margin-bottom: 2rem;
     }
-    .pdf-viewer p {
-      font-size: 0.95rem;
-      color: #555;
-      max-width: 900px;
-      margin: 0.5rem auto 1rem auto;
+    .pdf-viewer {
+      margin-bottom: 3rem;
     }
   </style>
 </head>
@@ -75,13 +67,13 @@
 
     <div class="pdf-viewer">
       <h3>Lab 11: PCB Trace Resistance & Failure Testing</h3>
-      <p>Measured trace resistance using multiple methods (two-wire, null, four-wire) and determined current capacity of copper traces. Experimentally stressed traces to the point of failure to understand thermal limitations.</p>
+      <p>Measured trace resistance using multiple methods (two-wire, null, four-wire) and determined current capacity of copper traces. Experimentally stressed traces to understand thermal limits.</p>
       <iframe class="pdf-frame" src="pdfs/Lab 11 Presentation ECEN 3730.pdf"></iframe>
     </div>
 
     <div class="pdf-viewer">
       <h3>Lab 15: Good vs. Bad PCB Design</h3>
-      <p>Compared layouts with different capacitor placement and return paths, showing how poor practices cause noise, ground bounce, and voltage collapse. Demonstrated that optimized PCB layout improves signal integrity significantly.</p>
+      <p>Compared layouts with different capacitor placement and return paths, showing how poor practices cause noise, ground bounce, and voltage collapse. Demonstrated that optimized PCB layout improves signal integrity by up to 7.5×.</p>
       <iframe class="pdf-frame" src="pdfs/Lab 15 ECEN3730.pdf"></iframe>
     </div>
 
@@ -104,10 +96,23 @@
     </div>
 
     <div class="pdf-viewer">
+      <h3>Board 2: Good vs. Bad PCB Design</h3>
+      <p>Explored PCB best practices by creating two nearly identical hex inverter circuits: one with optimized layout (solid return plane, close decoupling) and one with intentionally poor layout. Demonstrated how good design reduced ground bounce by ~4× and improved rise times:contentReference[oaicite:2]{index=2}.</p>
+      <iframe class="pdf-frame" src="pdfs/ECEN3730 Board 2 Report.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
       <h3>Board 3: Golden Arduino</h3>
-      <p>Custom-built ATmega328P-based Arduino clone with improved power delivery and noise performance. Implemented USB-to-serial, multiple crystals, decoupling strategies, and debugging test points. Compared against a commercial Arduino, showing improved signal integrity and stability.</p>
+      <p>Custom-built ATmega328P-based Arduino clone with improved power delivery and noise performance. Implemented USB-to-serial, multiple crystals, decoupling strategies, and debugging test points. Compared against a commercial Arduino, showing significantly better signal integrity.</p>
       <iframe class="pdf-frame" src="pdfs/ECEN 3730 Board 3 Report.pdf"></iframe>
     </div>
+
+    <div class="pdf-viewer">
+      <h3>Board 4: Instrument Droid</h3>
+      <p>Final project — a 4-layer Atmega328P-based measurement system that characterizes Thevenin resistance of voltage sources. Integrated DAC, ADC, MOSFET current source, op-amp control, LEDs, and buzzer feedback. Produced clean, accurate measurements and real-time feedback:contentReference[oaicite:3]{index=3}.</p>
+      <iframe class="pdf-frame" src="pdfs/ECEN 3730 Board 4 Report.pdf"></iframe>
+    </div>
+
   </section>
 
   <!-- Footer -->
