@@ -23,10 +23,18 @@
       height: 600px;
       border: 1px solid #ccc;
       border-radius: 8px;
+      margin-top: 1rem;
+      margin-bottom: 2rem;
+    }
+    .pdf-viewer p {
+      font-size: 0.95rem;
+      color: #555;
+      max-width: 800px;
+      margin: 0.5rem auto 1rem auto;
     }
     .code-viewer {
       max-width: 1000px;
-      margin: 2rem auto;
+      margin: 3rem auto;
       background: #1e1e1e;
       color: #f8f8f2;
       padding: 1.5rem;
@@ -40,6 +48,8 @@
     pre {
       white-space: pre-wrap;
       word-wrap: break-word;
+      font-size: 0.85rem;
+      line-height: 1.3;
     }
   </style>
 </head>
@@ -72,21 +82,73 @@
 
     <div class="pdf-viewer">
       <h3>Embedded Tetris Final Project</h3>
+      <p>Developed a Tetris game on an embedded system using C and hardware drivers for an LCD and input devices. Demonstrates real-time graphics, interrupts, and embedded system optimization.</p>
       <iframe class="pdf-frame" src="pdfs/Embedded Tetris Writeup.pdf"></iframe>
     </div>
 
     <div class="pdf-viewer">
-      <h3>ECEN 2350: FPGA Digital Logic (SystemVerilog)</h3>
+      <h3>ECEN 2350: Lab 1 – Measurement Practices</h3>
+      <p>Introduced test equipment and digital logic basics, including waveform measurement and initial FPGA setup.</p>
       <iframe class="pdf-frame" src="pdfs/2350Lab1.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
+      <h3>ECEN 2350: Lab 2 – Combinational Logic</h3>
+      <p>Designed and verified simple logic circuits using SystemVerilog, simulation, and synthesis onto FPGA hardware.</p>
       <iframe class="pdf-frame" src="pdfs/2350Lab2.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
+      <h3>ECEN 2350: Lab 3 – Multiplexers & Decoders</h3>
+      <p>Implemented MUX/Decoder circuits to explore resource utilization and hardware optimization.</p>
       <iframe class="pdf-frame" src="pdfs/2350Lab3.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
+      <h3>ECEN 2350: Lab 4 – Sequential Logic</h3>
+      <p>Built flip-flop based sequential circuits and studied timing behavior in FPGA systems.</p>
       <iframe class="pdf-frame" src="pdfs/2350Lab4.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
+      <h3>ECEN 2350: Lab 5 – Finite State Machines</h3>
+      <p>Designed FSMs in SystemVerilog and validated them in simulation and FPGA hardware testing.</p>
       <iframe class="pdf-frame" src="pdfs/2350Lab5.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
+      <h3>ECEN 2350: Lab 6 – Arithmetic Circuits</h3>
+      <p>Constructed adders and ALU components, integrating arithmetic circuits into FPGA designs.</p>
       <iframe class="pdf-frame" src="pdfs/2350Lab6.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
+      <h3>ECEN 2350: Lab 7 – Memory Elements</h3>
+      <p>Explored RAM and ROM usage in FPGA designs, including synchronous and asynchronous read/write.</p>
       <iframe class="pdf-frame" src="pdfs/2350Lab7.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
+      <h3>ECEN 2350: Lab 8 – Counters & Timers</h3>
+      <p>Implemented counters and digital timers, applying them to time-dependent FPGA applications.</p>
       <iframe class="pdf-frame" src="pdfs/2350Lab8.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
+      <h3>ECEN 2350: Lab 9 – UART & Communication</h3>
+      <p>Designed UART-based communication modules, transmitting and receiving data between FPGA and PC.</p>
       <iframe class="pdf-frame" src="pdfs/2350Lab9.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
+      <h3>ECEN 2350: Lab 10 – Integration Project</h3>
+      <p>Combined multiple modules into a cohesive design, demonstrating cumulative FPGA design skills.</p>
       <iframe class="pdf-frame" src="pdfs/2350Lab10.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
+      <h3>ECEN 2350: Final Project Report</h3>
+      <p>Capstone FPGA project integrating combinational logic, FSMs, and UART communication into a complete hardware design.</p>
       <iframe class="pdf-frame" src="pdfs/2350Final.pdf"></iframe>
     </div>
   </section>
@@ -97,22 +159,1232 @@
 
     <div class="code-viewer">
       <h3>Project 1: Adding Machine</h3>
-      <pre><code class="language-asm">[PASTE YOUR PROJECT 1 CODE HERE]</code></pre>
+      <pre><code class="language-asm">
+.equ UART_DATA, 0x1000
+.equ UART_CTRL, 0x1004
+.equ SEVEN_SEG, 0x20
+.equ SEVEN_SEG_4_5, 0x30
+.equ EDGE, 0x5c # Edge capture register
+.equ INTERRUPT_MASK, 0x58 # Push-button PPI Interrupt Mask Register
+.equ MMIO_BASE, 0xff200000
+
+/*
+* ECEN 2360 Project 1: Adding Machine
+* Connor Sorrell
+
+	Extra Credit Options:
+	-Full PushButton Interrupt implementation
+	-Handles the editing of a number by typing backspace
+	-Limits the number of characters accepted in the input to 6 chars
+	-Support for displaying accumulated values greater than 9999 (Up to 999999)
+	-Used cool coding techniques, such as using .equ -defined symbols or macros
+	-"Bells and Whistles" - Program does not allow any char input other than
+	characters 0-9, -, ' ', and '\b'
+*/
+
+.section .reset, "ax"
+.global _start
+_start:
+    movia sp, 0x01000000 # Stack at 16MB point
+    movia gp, MMIO_BASE # Base address for MMIO
+    br main	
+
+# Interrupt Handler
+.section .exceptions, "ax"
+    rdctl et, ipending
+    bne et, r0, Interrupt
+    eret
+
+Interrupt:
+    subi ea, ea, 4
+    subi sp, sp, 28
+    stw ra, 24(sp)
+    # Save registers 
+    stw r2, 0(sp)
+    stw r3, 4(sp)
+    stw r4, 8(sp)
+    stw r5, 12(sp)
+    stw r6, 16(sp)
+    stw r7, 20(sp)
+   
+    
+    # Clear interrupt flag
+    ldwio r3, EDGE(gp)
+    stwio r3, EDGE(gp)
+    
+    # Reset total and display
+    movia r3, TotalSum
+    stw r0, (r3)
+    mov r4, r0
+    call showNum
+    
+    # Print new total (0)
+    movi r4, '\n'
+    call putchar
+    movia r4, Total
+    call puts
+    mov r4, r0
+    call printNum
+    movi r4, '\n'
+    call putchar
+    movia r4, UserPrompt
+    call puts
+    
+    # Restore registers
+    ldw ra, 24(sp)
+    ldw r2, 0(sp)
+    ldw r3, 4(sp)
+    ldw r4, 8(sp)
+    ldw r5, 12(sp)
+    ldw r6, 16(sp)
+    ldw r7, 20(sp)
+    addi sp, sp, 28
+    eret
+
+.text
+main:
+	movi r2, 1
+    stwio r2, INTERRUPT_MASK(gp)
+    movi r2, 2
+    wrctl ienable, r2 
+    movi r2, 1
+    wrctl status, r2
+	
+main_loop:
+    # Prompt user
+    movia r4, UserPrompt
+    call puts
+
+    # Get input
+    movia r4, Buffer
+    call gets
+
+    # Show response
+    #movia r4, Response
+    #call puts
+    #movia r4, Buffer
+    #call puts
+    #movi r4, '\n'
+    #call putchar
+
+    # Convert input to integer
+    movia r4, Buffer
+    call atoi
+    mov r16, r2           # Store result from atoi in r16
+
+    # Update the total
+    movia r5, TotalSum
+    ldw r4, (r5)          # Load current total
+    add r4, r4, r16       # Add input value to current total
+    stw r4, (r5)          # Store updated total in TotalSum
+
+    # Display updated total
+    movia r4, Total       # Print "Total: " label
+    call puts
+    movia r5, TotalSum    # Load address of TotalSum
+    ldw r4, (r5)          # Load updated total
+    call printNum         # Print the total
+    #movi r4, '\n'         # Print a newline
+    #call putchar
+
+	# Display current total
+    movia r2, TotalSum
+    ldw r4, (r2)
+    call showNum          # Update the seven-segment display
+	
+    # Repeat loop
+    br main_loop
+
+	# Display functions
+showNum:
+    subi sp, sp, 4
+    stw ra, 0(sp)
+    call num2bits
+    stwio r2, SEVEN_SEG(gp)
+    stwio r3, SEVEN_SEG_4_5(gp)
+    ldw ra, 0(sp)
+    addi sp, sp, 4
+    ret
+
+num2bits: # Converts the number in r4 to a 32-bit value for seven-segment display
+    movi r2, 0          # Lower 32-bits (HEX0-3)
+    movi r3, 0          # Upper 16-bits (HEX4-5)
+    movi r10, 10        # Base 10
+    movi r7, 0          # Position counter
+
+n2b_loop:
+    div r8, r4, r10
+    mul r5, r8, r10
+    sub r5, r4, r5      # Get remainder
+    beq r4, r0, n2b_check_done
+    ldbu r6, Bits7seg(r5)
+    movi r9, 4
+    bge r7, r9, high_digits
+    
+    # Lower digits
+    movi r5, 8
+    mul r5, r7, r5
+    sll r6, r6, r5
+    or r2, r2, r6
+    br n2b_continue
+    
+high_digits:
+    subi r5, r7, 4
+    movi r9, 8
+    mul r5, r5, r9
+    sll r6, r6, r5
+    or r3, r3, r6
+
+n2b_continue:
+    mov r4, r8
+    addi r7, r7, 1
+    movi r5, 6
+    blt r7, r5, n2b_loop
+    ret
+
+n2b_check_done:
+    mov r5, r2
+    or r5, r5, r3
+    bne r5, r0, return
+    beq r8, r0, display_zero
+    ret
+
+display_zero:
+    ldbu r2, Bits7seg(r0)
+	
+return:
+    ret
+
+printNum:  # Recursive function to print number to UART
+    subi sp, sp, 8         
+    stw ra, 4(sp)          
+    stw r4, 0(sp)          # r4 = current number
+    bge r4, r0, not_neg    # If r4 >= 0, skip negative handling
+
+    # Handle negative numbers
+    sub r4, r0, r4         # Convert to positive
+    movi r10, '-'          # Load & print negative sign
+    call putchar            
+    ldw r4, 0(sp)          
+
+not_neg:
+    movi r10, 10           # Base 10 divisor
+    bge r4, r10, not_base  # If r4 >= 10, skip base case
+
+    # Base case: Single digit
+    addi r4, r4, '0'       # Convert to ASCII
+    call putchar           # Print digit
+    ldw ra, 4(sp)          # Restore return address
+    addi sp, sp, 8         # Clean up stack
+    ret
+
+not_base:
+    div r3, r4, r10        # r3 = r4 / 10
+    mul r5, r3, r10        # r5 = r3 * 10
+    sub r5, r4, r5         # r5 = r4 % 10
+    stw r5, 0(sp)          # Save remainder
+    mov r4, r3             # Prepare next digit
+    call printNum          # Recursive call
+    ldw r5, 0(sp)          # Restore remainder
+    addi r4, r5, '0'       # Convert remainder to ASCII
+    call putchar           # Print digit
+    ldw ra, 4(sp)          
+    addi sp, sp, 8         
+    ret
+                		   
+atoi:
+    movi r2, 0      # r2 = result
+    movi r3, 0      # Flag for (-) sign
+    ldbu r5, (r4)   
+    
+    cmpeqi r6, r5, '-' # Check for negative sign
+    beq r6, r0, atoi_loop 
+    movi r3, 1      # Set negative flag
+    addi r4, r4, 1  # Move past minus
+	
+atoi_loop:
+    ldbu r5, (r4)
+    movi r6, '0'
+    blt r5, r6, atoi_done
+    movi r6, '9'
+    bgt r5, r6, atoi_done
+    muli r2, r2, 10
+    subi r5, r5, '0'
+    add r2, r2, r5
+    addi r4, r4, 1
+    br atoi_loop
+
+atoi_done:
+    beq r3, r0, return
+    sub r2, r0, r2  # Negate if needed
+
+puts:
+    ldbu r3, (r4)
+	beq r3, r0, return
+	addi r4, r4, 1
+    
+putchar_check:
+    ldwio r2, UART_CTRL(gp)
+    srli r2, r2, 16
+    beq r2, r0, putchar_check
+    stwio r3, UART_DATA(gp)
+    br puts
+	
+gets:
+    subi sp, sp, 16        # Reserve stack space for ra, r17, and r19
+	stw r20, 12(sp)
+    stw ra, 8(sp)          
+    stw r17, 4(sp)         
+    stw r19, 0(sp)         
+    movi r17, Buffer       # r17 = Buffer pointer
+    movi r19, 1            # r19 = Flag for first character
+	movi r20, 0			   # r20 = Char count
+gets_loop:
+    call getchar
+    mov r3, r2
+    movi r2, '\n' # Check for newline (Enter) 
+    beq r2, r3, gets_done
+
+    # Check for valid characters only (0-9, -)
+    movi r2, '0'
+    blt r3, r2, check_special    # If r3 < 0, check if it's '-' or ' '
+    movi r2, '9'
+    ble r3, r2, valid_char        # If r3 <= 9, go process
+
+check_special: # Checks to see if the input is a backspace or minus sign
+    movi r2, '-'
+    beq r3, r2, check_first_char  # If r3 == '-', check if it can be valid
+	movi r2, 0x7F # Check for backspace
+	beq r2, r3, handle_backspace
+    br gets_loop               # If none of the above, invalid char, retry
+
+check_first_char: # Makes sure a minus sign can only be inputted as the first char
+    beq r19, r0, gets_loop    # '-' is invalid if its not the first character
+	subi r20, r20, 1
+    br valid_char                # '-' is valid as the first character
+
+valid_char:
+    # Check for backspace
+    movi r2, 0x7F
+    beq r2, r3, handle_backspace
+	
+	# Check if max buffer size reached (6 chars) 
+    movi r2, 6                  # Max buffer size
+    beq r2, r20, gets_loop      # If so, ignore input and loop
+    
+    # Store character
+    stb r3, (r17)
+    mov r4, r3
+    call putchar
+    addi r17, r17, 1	# Buffer ptr++
+	addi r20, r20, 1	# Character count++
+    movi r19, 0           # Reset first character flag
+    br gets_loop
+
+handle_backspace:
+    cmpeq r2, r17, r4
+    bne r2, r0, gets_loop
+    subi r17, r17, 1
+	subi r20, r20, 1 #Decrement char counter (Backspace clears up a char spot)
+	movia r4, 0x08
+    call putchar
+    movi r4, ' '
+    call putchar
+    movi r4, 0x08
+    call putchar
+    br gets_loop
+
+gets_done:
+    stb r0, (r17)          # Null-terminate the string
+    ldw r19, 0(sp)         
+    ldw r17, 4(sp)         
+    ldw ra, 8(sp)          
+	ldw r20, 12(sp)
+    addi sp, sp, 16        
+	ret
+
+putchar:
+    ldwio r2, UART_CTRL(gp)
+    srli r2, r2, 16
+    beq r2, r0, putchar
+    stwio r4, UART_DATA(gp)
+    ret
+
+getchar:
+    ldwio r2, UART_DATA(gp)
+    andi r3, r2, 0x8000
+    beq r3, r0, getchar
+    andi r2, r2, 0xFF
+    ret
+	
+.data
+TotalSum: .word 0
+Buffer: .space 100, 0
+UserPrompt: .asciz "\n=*=*=*=*=*=*=*=*=*=*=\n Enter number: "
+Response:   .asciz "\n>> You Typed: "
+Total:      .asciz "\n=== Total: "
+Bits7seg: .byte 0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x67
+
+.end
+      </code></pre>
     </div>
 
     <div class="code-viewer">
       <h3>Project 2A: Stopwatch</h3>
-      <pre><code class="language-asm">[PASTE YOUR PROJECT 2A CODE HERE]</code></pre>
+      <pre><code class="language-asm">
+.equ UART_DATA, 0x1000           # UART data base addr
+.equ UART_CTRL, 0x1004           # UART control base addr
+.equ SEVEN_SEG, 0x20             # Hex0-hex3 offset
+.equ SEVEN_SEG_4_5, 0x30         # Hex4-hex5 offset
+.equ BUTTONS, 0x50               # Button offset
+.equ MMIO_BASE, 0xff200000       # Peripheral base addr
+
+/*
+ * ECEN 2360 Project 2A: Stopwatch
+ * Connor Sorrell 
+ */
+
+.section .reset, "ax"
+.global _start
+_start:
+    movia sp, 0x01000000          # Stack at 16MB point
+    movia gp, MMIO_BASE           # Base address for MMIO
+    br main    
+
+.text
+main:
+    #initialize stopwatch to 00:00:00
+    movi r2, 0                    
+    stw r2, Hundredths(r0)
+    stw r2, Seconds(r0)
+    stw r2, Minutes(r0)
+    stw r2, b0_prev(r0)     # previous button 0 state = 0
+    stw r2, b1_prev(r0)     # previous button 1 state = 0
+    call showNum   #diisplay (00:00.00) to start
+
+main_loop:
+    call handleButtons    #handle different button states 
+    
+    ldw r2, Running(r0)           
+    beq r2, r0, update_display #If running == 0, skip the time increment
+    
+    ldw r2, Hundredths(r0)        #get current hundredths of a second count
+    addi r2, r2, 1     #Increase hundredths of a second by 1
+    
+    movi r3, 100
+    blt r2, r3, store_hundredths  #If hundredths < 100, store it & skip the overflow logic
+    movi r2, 0       # if hundredths > 99, reset hundredths to 0
+    ldw r4, Seconds(r0)  #if hundredths overflow, we get the curr. seconds count
+    addi r4, r4, 1      #increment seconds by 1
+    stw r4, Seconds(r0)  #Store updated seconds count
+    
+    movi r5, 60
+    blt r4, r5, store_hundredths   # If seconds < 60, store hundredths & skip the overflow logic
+    movi r4, 0           #if seconds > 59, reset seconds (seconds = 0)
+    stw r4, Seconds(r0)      
+    
+    ldw r6, Minutes(r0)     #If seconds overflowed, grab the current minutes count
+    addi r6, r6, 1     #increment minutes by 1
+    stw r6, Minutes(r0)      #Store the updated minute count
+    
+    movi r7, 60
+    blt r6, r7, store_hundredths   #If minutes < 60, store hundredths & skip overflow logic
+    movi r6, 0             #if we overflowed, reset minutes (minutes = 0)
+    stw r6, Minutes(r0)    
+
+store_hundredths:
+    stw r2, Hundredths(r0) #store updated hundredths count
+
+update_display:
+    ldw r2, Frozen(r0)         
+    bne r2, r0, freeze_display   #If frozen = 1, freeze the display & skip the display update
+    call showNum      #If not frozen, update display with current time
+	
+freeze_display:
+    call delay10ms     #delay and repeat loop
+    br main_loop              
+
+	# Seven-seg display functions
+showNum: #updating seveven-seg display with stopwatch time
+ 	subi sp, sp, 4         
+    stw ra, 0(sp)              
+    call num2bits
+    stwio r2, SEVEN_SEG(gp)     # write the lower 4 digits to hex0-hex3
+    stwio r3, SEVEN_SEG_4_5(gp)   # write the upper 2 digits to hex4-hex5
+    ldw ra, 0(sp)              
+    addi sp, sp, 4            
+    ret
+
+num2bits: # Converts stopwatch time (MM:SS.HH) into 7-segment display bits
+    movi r2, 0     # HEX0-3 (Lower digits)
+    movi r3, 0     # HEX4-5 (Upper digits)
+    movi r10, 10     # base 10 for decimal
+    movi r7, 0   #Position ctr initialize to 0
+	
+    movia r6, 0x00800000     #turn on decimal pt bit HEX3
+    or r2, r2, r6          
+    movi r6, 0x80    # turn on decimal pt bit for HEX5
+    or r3, r3, r6 
+    ldw r4, Hundredths(r0)    #load stopwatch hundredth second value
+
+n2b_loop:
+    div r8, r4, r10      #Extracting the current digit
+    mul r5, r8, r10      #Multiply to isolate remainder
+    sub r5, r4, r5        # Get remainder
+    ldbu r6, Bits7seg(r5)    # Get the HEX equivelant
+    movi r9, 4     # If r7 (position) >= 4 (threshold for hex0-3 and hex4-5), branch to upper digit handler
+    bge r7, r9, high_digits  
+
+    #Lower digits (HEX0-HEX3)
+    muli r5, r7, 8            
+    sll r6, r6, r5          
+    or r2, r2, r6             
+    br continue
+
+high_digits: # Upper digits (HEX4-HEX5)
+    subi r5, r7, 4           
+    muli r5, r5, 8         
+    sll r6, r6, r5           
+    or r3, r3, r6           
+
+continue:
+    mov r4, r8      #move to the next digit
+    addi r7, r7, 1   # position counter++
+    movi r5, 2                
+    beq r7, r5, load_seconds  # Handle seconds after processing hundredths
+    movi r5, 4
+    beq r7, r5, load_minutes  #Handle minutes after processing seconds
+    movi r5, 6           #6 digits total (MM, SS, HH)
+    blt r7, r5, n2b_loop    #keep looping until all digits are processed
+    ret
+
+load_seconds:
+    ldw r4, Seconds(r0)     #r4 = seconds
+    br n2b_loop
+
+load_minutes:
+    ldw r4, Minutes(r0)    # r5 = minutes 
+    br n2b_loop
+
+check_done: # Handling zero
+    mov r5, r2
+    or r5, r5, r3
+    bne r5, r0, return     #return if any bits are set
+    ldbu r2, Bits7seg(r0)   #else, display 0 
+    ret
+
+return:
+    ret
+
+#State machine to handle button presses
+handleButtons:
+    subi sp, sp, 16            
+    stw ra, 12(sp)             
+    stw r3, 8(sp)      # (r3 == state of button 0)
+    stw r4, 4(sp)      # (r4 == state of button 1)
+    stw r5, 0(sp)             
+
+    ldwio r2, BUTTONS(gp)      # buttons = ReadButtons()
+    andi r3, r2, 0x1        # b0_current = buttons & 0x1
+    andi r4, r2, 0x2        # b1_current = buttons & 0x2
+
+    ldw r5, b0_prev(r0)        
+    beq r5, r0, checkButton1       # If b0_last != 1 && b0_current != 0) {
+    bne r3, r0, checkButton1       # skip to button 1 logic
+
+    #button 0 triggered:
+    ldw r6, Running(r0)        
+    xori r6, r6, 1           # running = !running
+    stw r6, Running(r0)        
+    movi r7, 0            # frozen = false
+    stw r7, Frozen(r0)         
+
+#Checks state of button 1
+checkButton1:
+    ldw r5, b1_prev(r0)        
+    beq r5, r0, update_states  	# if (b1_last != 1 && b1_current != 0)
+    bne r4, r0, update_states  	# skip to state updates (end of function)
+
+    #button 1 triggered:
+    ldw r6, Running(r0)       
+    beq r6, r0, resetStopwatch 		# if (!running), -> ResetTime()
+
+    ldw r7, Frozen(r0)         #else, we are running, so handle the freeze/lap
+    xori r7, r7, 1             
+    stw r7, Frozen(r0)         # frozen = !frozen;
+	
+    br update_states       #go update states
+
+#Resets stopwatch to (00:00:00)
+resetStopwatch:
+    movi r6, 0                
+    stw r6, Hundredths(r0)  	  # reset hundredths, minutes, seconds 
+    stw r6, Seconds(r0)      
+    stw r6, Minutes(r0)      
+    br update_states      #move to state updates
+
+update_states:
+    stw r3, b0_prev(r0)     #b0_last = b0_current;
+    stw r4, b1_prev(r0)     #b1_last = b1_current;
+
+    #restore registers
+    ldw r5, 0(sp)            
+    ldw r4, 4(sp)    
+    ldw r3, 8(sp)             
+    ldw ra, 12(sp)             
+    addi sp, sp, 16           
+    ret                       
+
+delay10ms:  # Delay for the 10ms interval between updates to the hundredths digits
+    movia r2, 80333  #Number allows for almost perfect match with actual time
+delay10ms_loop:
+	subi r2, r2, 1        #delay ctr-- 
+	bne r2, r0, delay10ms_loop # keep calling, effectively 2 clocks
+    ret
+
+.data
+Hundredths: .word 0      
+Seconds:    .word 0       
+Minutes:    .word 0        
+Running:    .word 0      #stopwatch running state
+Frozen:     .word 0      # frozen state
+b0_prev:   .word 0   #previous state of button 0
+b1_prev:   .word 0   #previous state of button 1
+Bits7seg:   .byte 0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x67 # digits 0-9
+.end
+      </code></pre>
     </div>
 
     <div class="code-viewer">
       <h3>Project 2B: Stopwatch with Interrupts</h3>
-      <pre><code class="language-asm">[PASTE YOUR PROJECT 2B CODE HERE]</code></pre>
+      <pre><code class="language-asm">
+.equ MMIO_BASE, 0xff200000		# Peripheral base addr
+.equ UART_DATA, 0x1000			# UART data base addr offset
+.equ UART_CTRL, 0x1004			# UART control base addr offset
+.equ TIME_STAT, 0x2000			# Timer status reg offset
+.equ TIME_CTRL, 0x2004			# Timer ctrl reg offset
+.equ TIME_STRTL, 0x2008			# Timer start low offset
+.equ TIME_STRTH, 0x200C			# Timer start high offset
+.equ BUTTON_EDGE, 0x5c			# Button edge capture offset
+.equ BUTTON_MASK, 0x58			# Button mask register offset
+.equ SEVEN_SEG, 0x20             # Hex0-hex3 offset 
+.equ SEVEN_SEG_4_5, 0x30         # Hex4-hex5 offset
+
+/*
+ * ECEN 2360 Project 2B: Stopwatch with Interrupts
+ * Connor Sorrell 
+ 
+ Extra credit (per Project PDF)
+ -Printed Lap times on JTAG UART terminal
+ -Used cool coding techniques, such as using .equ -defined symbols 
+ -Used both recursive and non-recursive algorithims
+ */
+
+.section .reset, "ax"
+.global _start
+_start:
+    movia sp, 0x01000000 #stack ptr
+    movia gp, MMIO_BASE #global ptr
+    br main
+
+.section .exceptions, "ax"
+    rdctl et, ipending	# Check to see if we have any pending interrupts
+    bne et, r0, Interrupt_Handler # If we have interrupts pending, go handle them
+    eret 	# Return from exception
+
+Interrupt_Handler:
+    subi ea, ea, 4
+    subi sp, sp, 52			#Create space on stack & save registers
+    stw r2, (sp)
+    stw r3, 4(sp)
+    stw r4, 8(sp)
+    stw r5, 12(sp)
+    stw r6, 16(sp)
+    stw r7, 20(sp)
+    stw r8, 24(sp)
+    stw r9, 28(sp)
+    stw r10, 32(sp)
+    stw r11, 36(sp)
+    stw r12, 40(sp)
+    stw ra, 44(sp)
+    stw r16, 48(sp)
+
+    andi r3, et, 2	# if interrupt is set
+    movi r4, 2
+    beq r3, r4, pushbutton # go to pushbutton handler
+
+timer:
+    # Check if stopwatch is running
+    movia r8, Running
+    ldw r9, (r8)
+    beq r9, r0, restore  # If stopwatch isn't running, skip timer handling
+
+    sthio r0, TIME_STAT(gp)    # Clear timer interrupt
+
+    movia r5, LowerDisplayValue
+    ldw r6, (r5)
+    addi r6, r6, 1	#increment lower display
+    movi r7, 6000  #if value != 1 minute (100updates/sec * 60 secs)
+    bne r7, r6, store_lower	#Then go update lower display
+
+    stw r0, (r5)	#Reset lower display & increment higher display value
+    movia r8, HigherDisplayValue
+    ldw r9, (r8)	
+    addi r9, r9, 1		#Higherdisplayvalue++
+    stw r9, (r8)		# Store new value
+    br display_update	# Continue to update display
+
+store_lower: #Storing lower display value
+    stw r6, (r5)	
+
+display_update:
+    movia r8, Frozen
+    ldw r9, (r8)
+    bne r9, r0, restore  # if displayfrozen == true, skip update
+    mov r4, r6
+    call showNum	#Otherwise, update lower & higher display
+    movia r4, HigherDisplayValue
+    ldw r4, (r4)
+    call showNum_High
+    br restore
+
+pushbutton: #Button interrupt handler
+    ldwio r4, BUTTON_EDGE(gp) #Read and clear button edge capture reg.
+    stwio r4, BUTTON_EDGE(gp)
+
+    movi r5, 1		#If button 1 == pressed, go handle lap or reset
+    and r4, r5, r4
+    bne r5, r4, lap_or_reset  
+
+start_stop: 
+    movia r8, Running
+    ldw r9, (r8) # Running = !running
+    xori r9, r9, 1
+    stw r9, (r8)	#Store new value
+    br restore
+
+lap_or_reset: #Handle lap or reset button
+    movia r8, Running
+    ldw r9, (r8)
+    beq r9, r0, reset_stopwatch  # If stopwatch isn't running, reset
+    movia r8, Frozen #Else, toggle frozen state
+    ldw r9, (r8)
+    xori r9, r9, 1    #Frozen = !frozen
+    stw r9, (r8)
+    beq r9, r0, restore  # if frozen == 0, return
+    movia r5, LapCount
+    ldw r4, (r5)
+    addi r4, r4, 1 #Increment lap count and store new value
+    stw r4, (r5)
+    movia r4, LapPrompt  # Print "Lap Time #:"
+    call puts
+    movia r5, LapCount
+    ldw r4, (r5)
+    call printNum_Recursive	# Print current lap count
+    movia r4, LapPromptColon	# ": "
+    call puts
+    movia r4, HigherDisplayValue #Print minutes
+    ldw r4, (r4)
+    call printLeadingZero	#print the leading 0 if needed
+    movi r4, ':'
+    call putchar
+	movia r16, LowerDisplayValue #Print seconds
+    ldw r16, (r16)
+    movi r5, 100	#Divisor for seconds 
+    div r4, r16, r5		# divide to get seconds
+    call printLeadingZero	#print the leading 0 if needed
+    movi r4, '.' #Print the decimal pt
+    call putchar
+    mov r4, r16 	#Print hundredths of second
+    movi r6, 100	# Divisor for hundredths
+    div r5, r16, r6 	# Get seconds
+    mul r5, r5, r6 		# multiply to get TOTAL seconds
+    sub r4, r16, r5		#subtract to obtain just the hundredths
+    movi r8, 10
+    bge r4, r8, print_hundredths  #If less than 10, make sure we print leading zero
+    movi r4, '0'
+    call putchar
+    mov r4, r16 
+    movi r6, 100 # Divisor for hundredths 
+    div r5, r16, r6 # get the whole number for hundredths
+    mul r5, r5, r6  
+    sub r4, r16, r5	# Get remainder for tens place
+
+print_hundredths: #Print hundredths handler
+    call printNum
+    movi r4, '\n'
+    call putchar
+    br restore
+
+printLeadingZero:
+    subi sp, sp, 12     
+    stw ra, (sp)       
+    stw r4, 4(sp)       
+    stw r8, 8(sp)       
+    movi r8, 10		# If num < 10, call leading_zero 
+    blt r4, r8, leading_zero
+    call printNum_Recursive	#Else, print num directly
+    ldw r4, 4(sp)         
+    ldw ra, (sp)           
+    ldw r8, 8(sp)
+    addi sp, sp, 12        
+    ret
+
+leading_zero:
+    movi r4, '0' # Load and print the leading zero
+    call putchar
+    ldw r4, 4(sp)    # Get original number   
+    call printNum_Recursive  #Print original number
+    ldw r4, 4(sp)          
+    ldw ra, (sp)           
+    ldw r8, 8(sp)
+    addi sp, sp, 12       
+    ret
+
+reset_stopwatch:	# Reset display values
+    movia r4, LowerDisplayValue  #Setting to 0s
+    stw r0, (r4)
+    movia r4, HigherDisplayValue
+    stw r0, (r4)
+    mov r4, r0     #Update display
+    call showNum_High
+    mov r4, r0
+    call showNum
+    movia r4, LapCount #Reset lap count
+    stw r0, (r4)
+    br restore
+
+restore:	# Restore registers
+    ldw r2, (sp)
+    ldw r3, 4(sp)
+    ldw r4, 8(sp)
+    ldw r5, 12(sp)
+    ldw r6, 16(sp)
+    ldw r7, 20(sp)
+    ldw r8, 24(sp)
+    ldw r9, 28(sp)
+    ldw r10, 32(sp)
+    ldw r11, 36(sp)
+    ldw r12, 40(sp)
+    ldw ra, 44(sp)
+    ldw r16, 48(sp)
+    addi sp, sp, 52
+    eret  #Return from the interrupt
+
+.text
+main:
+    # Initialize timer but do not start
+    movi r4, 0x4240		#Setting lower 16 bits 
+    sthio r4, TIME_STRTL(gp)
+    movi r4, 0xf		#Setting upper 16 bits
+    sthio r4, TIME_STRTH(gp)
+    movi r4, 7 		#enable timer interrupt, AR, start
+    sthio r4, TIME_CTRL(gp)
+
+    movia r4, Running
+    stw r0, (r4)	# Running = 0
+
+    movi r2, 3	#Enable button 0 and 1 interrupts
+    stwio r2, BUTTON_MASK(gp)
+
+    movi r4, 3	# Set interrupt enable bits 
+    wrctl ienable, r4
+    movi r2, 1 # Enabling global interrupt flag
+    wrctl status, r2
+
+    mov r4, r0  # Clear entire display
+    call showNum_High
+    mov r4, r0
+    call showNum
+
+main_loop:
+    br main_loop
+
+putchar:
+    ldwio r2, UART_CTRL(gp)
+    srli r2, r2, 16
+    beq r2, r0, putchar
+    stwio r4, UART_DATA(gp)
+    ret
+
+puts:
+    ldbu r3, (r4)
+    addi r4, r4, 1
+    beq r3, r0, puts_done
+	
+puts_repeat:
+    ldwio r2, UART_CTRL(gp)
+    srli r2, r2, 16
+    beq r2, r0, puts_repeat
+    stwio r3, UART_DATA(gp)
+    br puts
+	
+puts_done:
+    ret
+
+printNum:
+    beq r4, r0, print_zero #If digit = 0, go handle zero
+    subi sp, sp, 16
+    stw ra, (sp)
+    addi r8, sp, 4    
+    movi r5, 0        # r5 = digit count
+    movi r7, 10    # divisor to extract digits
+
+convert_loop:
+    beq r4, r0, print_digits #If no more digits, go print them
+    div r9, r4, r7  # r9 = r4 / 10
+    mul r10, r9, r7  # r10 = r9 * 10
+    sub r10, r4, r10  # r10 = remainder (current digit)
+    addi r10, r10, '0' #add 0 to convert to ASCII
+    stb r10, (r8)
+    addi r8, r8, 1   #move ptr to next digit
+    addi r5, r5, 1   #Digit count++ 
+    mov r4, r9 #Update number to continue extracting digits
+    br convert_loop
+
+print_digits:
+    subi r8, r8, 1  #Move back the to last digit (printing in reverse order)
+    
+print_loop:
+    beq r5, r0, print_done #If no more digits, exit loop
+    ldb r4, (r8)
+    call putchar	#Print digit
+    subi r8, r8, 1	# Move ptr back to the last digit
+    subi r5, r5, 1	# Digit ctr--
+    br print_loop  # Continue until all digits printed
+
+print_done:
+    ldw ra, (sp)
+    addi sp, sp, 16
+    ret
+
+print_zero:
+    movi r4, '0'
+    call putchar	#Print "0"
+    ret
+	
+printNum_Recursive:
+    movi r8, 10		# 10 = divisor for digit extraction 
+    blt r4, r8, single_digit #If num < 10, go handle printing a single digit
+    subi sp, sp, 12
+    stw r4, (sp)     # Saving original number
+    stw ra, 4(sp)    
+    stw r8, 8(sp)    # Save divisor
+    div r4, r4, r8    # Divide number by 10 (divisor) to isolate next digit
+    call printNum_Recursive  #Recursively call to handle next digits
+
+    ldw r4, (sp)
+    ldw ra, 4(sp)
+    ldw r8, 8(sp)
+    addi sp, sp, 12
+
+    div r9, r4, r8   # r9 = r4 / 10 
+    mul r10, r9, r8   # r10 = r9 * 10
+    sub r4, r4, r10   # subtract so that r4 = remainder (current digit) 
+
+single_digit:
+    addi r4, r4, '0' #Convert digit to ASCII by adding 0 
+    subi sp, sp, 4
+    stw ra, (sp)
+    call putchar # Print the digit
+    ldw ra, (sp)
+    addi sp, sp, 4
+    ret
+
+showNum:
+    stwio r0, SEVEN_SEG(gp)	# Clear display
+	
+loop:
+    bne r4, r0, showNum_else #If num !=0, branch away 
+	#Base case
+    ldwio r2, SEVEN_SEG(gp)
+    andi r11, r2, 0xF #Mask the lower 4 bits
+    beq r11, r0, showNum_else	#If the lower 4 bits = 0, go handle them
+    movia r5, 0x800000 	#Enable the decimal point
+    or r2, r2, r5
+    stwio r2, SEVEN_SEG(gp)
+    ret
+
+showNum_else:
+    movi r9, 10		# r9 = 10 (divisor for digit extraction) 
+    div r5, r4, r9	#divide it by 10
+    mul r6, r5, r9	#multiply it by 10
+    sub r6, r4, r6	#Subtract to compute remainder (current digit)
+    addi r10, r6, Bits7seg # Get the hex pattern
+    ldb r8, (r10) # Load the number 
+    slli r8, r8, 24 #Move the bit pattern to the most significant bits
+    ldwio r2, SEVEN_SEG(gp)
+    srli r2, r2, 8 #Clear space for new digit 
+    or r2, r2, r8	# Insert the new digit
+    stwio r2, SEVEN_SEG(gp) #Update display
+    mov r4, r5	#Copy quotient for the next iteration
+    br loop
+
+showNum_High: # Clear display
+    stwio r0, SEVEN_SEG_4_5(gp)
+	
+loop_High:
+    bne r4, r0, showNum_High_else #If input digit !=0, branch to else (all digits p
+	#Base case (r4= 0)
+    ldwio r2, SEVEN_SEG_4_5(gp)
+    andi r11, r2, 0xF # Mask lower 4 bits of high display value
+    beq r11, r0, showNum_High_else #If lower 4 bits = 0, branch to else
+    ret
+
+showNum_High_else: #Same exact logic as showNum_else, just for high display
+    movi r9, 10
+    div r5, r4, r9
+    mul r6, r5, r9
+    sub r6, r4, r6
+    addi r10, r6, Bits7seg
+    ldb r8, (r10)
+    slli r8, r8, 24
+    ldwio r2, SEVEN_SEG_4_5(gp)
+    srli r2, r2, 8
+    or r2, r2, r8
+    stwio r2, SEVEN_SEG_4_5(gp)
+    mov r4, r5
+    br loop_High
+
+.data
+LowerDisplayValue: .word 0
+Frozen:		.word 0
+Running: 	.word 0
+HigherDisplayValue: .word 0
+LapCount: .word 0
+Bits7seg: .byte 0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x67
+LapPrompt: .asciz "Lap Time "
+LapPromptColon: .asciz ": "
+
+.end
+      </code></pre>
     </div>
 
     <div class="code-viewer">
-      <h3>Final Project: Stopwatch Implementation</h3>
-      <pre><code class="language-asm">[PASTE YOUR FINAL PROJECT CODE HERE]</code></pre>
+      <h3>Final Project: Full Stopwatch Implementation</h3>
+      <pre><code class="language-asm">
+.equ UART_DATA, 0x1000           # UART data base addr
+.equ UART_CTRL, 0x1004           # UART control base addr
+.equ SEVEN_SEG, 0x20             # Hex0-hex3 offset
+.equ SEVEN_SEG_4_5, 0x30         # Hex4-hex5 offset
+.equ BUTTONS, 0x50               # Button offset
+.equ MMIO_BASE, 0xff200000       # Peripheral base addr
+
+/*
+ * ECEN 2360 Project 2: Stopwatch
+ * Connor Sorrell 
+ */
+
+.section .reset, "ax"
+.global _start
+_start:
+    movia sp, 0x01000000          # Stack at 16MB point
+    movia gp, MMIO_BASE           # Base address for MMIO
+    br main    
+
+.text
+main:
+    #initialize stopwatch to 00:00:00
+    movi r2, 0                    
+    stw r2, Hundredths(r0)
+    stw r2, Seconds(r0)
+    stw r2, Minutes(r0)
+    stw r2, b0_prev(r0)     # previous button 0 state = 0
+    stw r2, b1_prev(r0)     # previous button 1 state = 0
+    call showNum   #diisplay (00:00.00) to start
+
+main_loop:
+    call handleButtons    #handle different button states 
+    
+    ldw r2, Running(r0)           
+    beq r2, r0, update_display #If running == 0, skip the time increment
+    
+    ldw r2, Hundredths(r0)        #get current hundredths of a second count
+    addi r2, r2, 1     #Increase hundredths of a second by 1
+    
+    movi r3, 100
+    blt r2, r3, store_hundredths  #If hundredths < 100, store it & skip the overflow logic
+    movi r2, 0       # if hundredths > 99, reset hundredths to 0
+    ldw r4, Seconds(r0)  #if hundredths overflow, we get the curr. seconds count
+    addi r4, r4, 1      #increment seconds by 1
+    stw r4, Seconds(r0)  #Store updated seconds count
+    
+    movi r5, 60
+    blt r4, r5, store_hundredths   # If seconds < 60, store hundredths & skip the overflow logic
+    movi r4, 0           #if seconds > 59, reset seconds (seconds = 0)
+    stw r4, Seconds(r0)      
+    
+    ldw r6, Minutes(r0)     #If seconds overflowed, grab the current minutes count
+    addi r6, r6, 1     #increment minutes by 1
+    stw r6, Minutes(r0)      #Store the updated minute count
+    
+    movi r7, 60
+    blt r6, r7, store_hundredths   #If minutes < 60, store hundredths & skip overflow logic
+    movi r6, 0             #if we overflowed, reset minutes (minutes = 0)
+    stw r6, Minutes(r0)    
+
+store_hundredths:
+    stw r2, Hundredths(r0) #store updated hundredths count
+
+update_display:
+    ldw r2, Frozen(r0)         
+    bne r2, r0, freeze_display   #If frozen = 1, freeze the display & skip the display update
+    call showNum      #If not frozen, update display with current time
+	
+freeze_display:
+    call delay10ms     #delay and repeat loop
+    br main_loop              
+
+	# Seven-seg display functions
+showNum: #updating seveven-seg display with stopwatch time
+ 	subi sp, sp, 4         
+    stw ra, 0(sp)              
+    call num2bits
+    stwio r2, SEVEN_SEG(gp)     # write the lower 4 digits to hex0-hex3
+    stwio r3, SEVEN_SEG_4_5(gp)   # write the upper 2 digits to hex4-hex5
+    ldw ra, 0(sp)              
+    addi sp, sp, 4            
+    ret
+
+num2bits: # Converts stopwatch time (MM:SS.hh) into 7-segment display bits
+    movi r2, 0     # HEX0-3 (Lower digits)
+    movi r3, 0     # HEX4-5 (Upper digits)
+    movi r10, 10     # base 10 for decimal
+    movi r7, 0   #Position ctr initialize to 0
+	
+    movia r6, 0x00800000     #turn on decimal pt bit HEX3
+    or r2, r2, r6          
+    movi r6, 0x80    # turn on decimal pt bit for HEX5
+    or r3, r3, r6 
+    ldw r4, Hundredths(r0)    #load stopwatch hundredth second value
+
+n2b_loop:
+    div r8, r4, r10      #Extracting the current digit
+    mul r5, r8, r10      #Multiply to isolate remainder
+    sub r5, r4, r5        # Get remainder
+    ldbu r6, Bits7seg(r5)    # Get the HEX equivelant
+    movi r9, 4     # If r7 (position) >= 4 (threshold for hex0-3 and hex4-5), branch to upper digit handler
+    bge r7, r9, high_digits  
+
+    #Lower digits (HEX0-HEX3)
+    muli r5, r7, 8            
+    sll r6, r6, r5          
+    or r2, r2, r6             
+    br continue
+
+high_digits: # Upper digits (HEX4-HEX5)
+    subi r5, r7, 4           
+    muli r5, r5, 8         
+    sll r6, r6, r5           
+    or r3, r3, r6           
+
+continue:
+    mov r4, r8      #move to the next digit
+    addi r7, r7, 1   # position counter++
+    movi r5, 2                
+    beq r7, r5, load_seconds  # Handle seconds after processing hundredths
+    movi r5, 4
+    beq r7, r5, load_minutes  #Handle minutes after processing seconds
+    movi r5, 6           #6 digits total (MM, SS, HH)
+    blt r7, r5, n2b_loop    #keep looping until all digits are processed
+    ret
+
+load_seconds:
+    ldw r4, Seconds(r0)     #r4 = seconds
+    br n2b_loop
+
+load_minutes:
+    ldw r4, Minutes(r0)    # r5 = minutes 
+    br n2b_loop
+
+check_done: # Handling zero
+    mov r5, r2
+    or r5, r5, r3
+    bne r5, r0, return     #return if any bits are set
+    ldbu r2, Bits7seg(r0)   #else, display 0 
+    ret
+
+return:
+    ret
+
+#State machine to handle button presses
+handleButtons:
+    subi sp, sp, 16            
+    stw ra, 12(sp)             
+    stw r3, 8(sp)      # (r3 == state of button 0)
+    stw r4, 4(sp)      # (r4 == state of button 1)
+    stw r5, 0(sp)             
+
+    ldwio r2, BUTTONS(gp)      # buttons = ReadButtons()
+    andi r3, r2, 0x1        # b0_current = buttons & 0x1
+    andi r4, r2, 0x2        # b1_current = buttons & 0x2
+
+    ldw r5, b0_prev(r0)        
+    beq r5, r0, checkButton1       # If b0_last != 1 && b0_current != 0) {
+    bne r3, r0, checkButton1       # skip to button 1 logic
+
+    #button 0 triggered:
+    ldw r6, Running(r0)        
+    xori r6, r6, 1           # running = !running
+    stw r6, Running(r0)        
+    movi r7, 0            # frozen = false
+    stw r7, Frozen(r0)         
+
+#Checks state of button 1
+checkButton1:
+    ldw r5, b1_prev(r0)        
+    beq r5, r0, update_states  	# if (b1_last != 1 && b1_current != 0)
+    bne r4, r0, update_states  	# skip to state updates (end of function)
+
+    #button 1 triggered:
+    ldw r6, Running(r0)       
+    beq r6, r0, resetStopwatch 		# if (!running), -> ResetTime()
+
+    ldw r7, Frozen(r0)         #else, we are running, so handle the freeze/lap
+    xori r7, r7, 1             
+    stw r7, Frozen(r0)         # frozen = !frozen;
+	
+    br update_states       #go update states
+
+#Resets stopwatch to (00:00:00)
+resetStopwatch:
+    movi r6, 0                
+    stw r6, Hundredths(r0)  	  # reset hundredths, minutes, seconds 
+    stw r6, Seconds(r0)      
+    stw r6, Minutes(r0)      
+    br update_states      #move to state updates
+
+update_states:
+    stw r3, b0_prev(r0)     #b0_last = b0_current;
+    stw r4, b1_prev(r0)     #b1_last = b1_current;
+
+    #restore registers
+    ldw r5, 0(sp)            
+    ldw r4, 4(sp)    
+    ldw r3, 8(sp)             
+    ldw ra, 12(sp)             
+    addi sp, sp, 16           
+    ret                       
+
+delay10ms:
+    movia r2, 80333  
+delay10ms_loop:
+	subi r2, r2, 1        #delay ctr-- 
+	bne r2, r0, delay10ms_loop # keep calling, effectively 2 clocks
+    ret
+	
+
+.data
+Hundredths: .word 0      
+Seconds:    .word 0       
+Minutes:    .word 0        
+Running:    .word 0      #stopwatch running state
+Frozen:     .word 0      # frozen state
+b0_prev:   .word 0   #previous state of button 0
+b1_prev:   .word 0   #previous state of button 1
+Bits7seg:   .byte 0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x67 # Bit patterns for digits 0-9
+.end
+      </code></pre>
     </div>
   </section>
 
