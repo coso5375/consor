@@ -45,21 +45,29 @@ body {
 
 /* Hero */
 .hero {
-  background: #0f3057;
+  background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+              url("6203824260_c064aaba05_b-2602101627.jpg") no-repeat center/cover;
   color: #fff;
   text-align: center;
-  padding: 5rem 2rem;
+  padding: 6rem 2rem;
 }
 
 .hero h1 {
-  font-size: 2.5rem;
+  font-size: 2.8rem;
   margin-bottom: 1rem;
 }
 
 .hero h2 {
   font-weight: normal;
   margin-bottom: 1rem;
+  font-size: 1.5rem;
 }
+
+.hero p {
+  max-width: 700px;
+  margin: 0 auto 1.5rem auto;
+}
+
 
 .btn {
   display: inline-block;
