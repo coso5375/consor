@@ -1,35 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-       <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BSLL7X39LD"></script>
-    <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-BSLL7X39LD');
-    </script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Circuit Design - Portfolio</title>
-    <link rel="stylesheet" href="styles.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PCB Design - Portfolio</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PCB Design - Portfolio</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>PCB Design</h1>
-        <p>Printed Circuit Board designs and fabrication projects.</p>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="logo">Connor Sorrell</div>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="electronics-design.html">Electronics Design</a></li>
+        <li><a href="circuit-design.html">Circuit Design</a></li>
+        <li><a href="programming-projects.html">Programming</a></li>
+        <li><a href="pcb-design.html" class="active">PCB Design</a></li>
+      </ul>
+    </nav>
+  </header>
 
-        <p>Access all related PCB Design documents in this folder:</p>
-        <a href="https://drive.google.com/drive/u/1/folders/16tvKOmrWUnzQR3LSaoLw9iHMQa7joTU4" 
-           target="_blank" rel="noopener noreferrer" class="course-btn">
-            📂 Open PCB Design Folder
-        </a>
-
-        <a href="index.html" class="course-btn">Back to Portfolio</a>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>PCB Design</h1>
+      <h2>University of Colorado Boulder</h2>
+      <p>This section highlights hands-on PCB design work, from schematic capture and simulation to fabrication, assembly, and testing of complex boards. Emphasis is placed on design for signal integrity, power delivery, and professional lab practices.</p>
     </div>
+  </section>
+
+  <!-- PCB Projects -->
+  <section class="projects">
+    <h2>Featured PCB Design Work</h2>
+
+    <div class="pdf-viewer">
+      <h3>Lab 2: Introduction to Altium & PCB Layout</h3>
+      <p>Introduced schematic capture, component libraries, and basic PCB layout practices in Altium Designer. Gave first experience with design rule checks and managing board constraints.</p>
+      <iframe class="pdf-frame" src="pdfs/Lab 2 Report ECEN 3730.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
+      <h3>Lab 5: Power Delivery Networks</h3>
+      <p>Analyzed power distribution networks (PDNs), learning how capacitor placement and return paths affect noise and stability in high-speed circuits.</p>
+      <iframe class="pdf-frame" src="pdfs/Lab 5 Report ECEN 3730.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
+      <h3>Lab 9: Crosstalk and Coupling</h3>
+      <p>Investigated capacitive and inductive crosstalk between PCB traces, quantifying how spacing and geometry influence unwanted signal coupling.</p>
+      <iframe class="pdf-frame" src="pdfs/Lab 9 Report ECEN 3730.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
+      <h3>Lab 11: PCB Trace Resistance & Failure Testing</h3>
+      <p>Measured trace resistance using multiple methods (two-wire, null, four-wire) and determined current capacity of copper traces. Experimentally "blew up" traces to understand thermal limitations:contentReference[oaicite:0]{index=0}.</p>
+      <iframe class="pdf-frame" src="pdfs/Lab 11 Presentation ECEN 3730.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
+      <h3>Lab 15: Good vs. Bad PCB Design</h3>
+      <p>Compared layouts with different capacitor placement and return paths, showing how poor practices cause noise, ground bounce, and voltage collapse. Demonstrated that optimized PCB layout improves signal integrity by up to 7.5×:contentReference[oaicite:1]{index=1}.</p>
+      <iframe class="pdf-frame" src="pdfs/Lab 15 ECEN3730.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
+      <h3>Lab 16: Advanced PCB Signal Integrity</h3>
+      <p>Focused on analyzing switching noise and transient responses, reinforcing the importance of tight decoupling and minimizing parasitic inductances.</p>
+      <iframe class="pdf-frame" src="pdfs/Lab 16 ECEN3730.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
+      <h3>Lab 18: PCB Manufacturing Tolerances</h3>
+      <p>Studied manufacturing tolerances and their effect on PCB functionality, examining trace width, spacing, and solder mask implications on yield and reliability.</p>
+      <iframe class="pdf-frame" src="pdfs/Lab 18 Report ECEN 3730.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
+      <h3>Board 1: 555 Timer LED Board</h3>
+      <p>First complete PCB project — designed and built a 555 timer LED demo board. Practiced schematic capture, layout, JLCPCB fabrication, SMT assembly, and testing. Learned the importance of decoupling and current limitations:contentReference[oaicite:2]{index=2}.</p>
+      <iframe class="pdf-frame" src="pdfs/ECEN3730 Board 1 Report.pdf"></iframe>
+    </div>
+
+    <div class="pdf-viewer">
+      <h3>Board 3: Golden Arduino</h3>
+      <p>Custom-built ATmega328P-based Arduino clone with improved power delivery and noise performance. Implemented USB-to-serial, multiple crystals, decoupling strategies, and debugging test points. Compared against a commercial Arduino, showing 2×–10× better signal integrity:contentReference[oaicite:3]{index=3}.</p>
+      <iframe class="pdf-frame" src="pdfs/ECEN 3730 Board 3 Report.pdf"></iframe>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 Connor Sorrell | <a href="https://github.com/">GitHub</a> | <a href="https://linkedin.com/">LinkedIn</a></p>
+  </footer>
 </body>
 </html>
