@@ -1,46 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-       <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BSLL7X39LD"></script>
-    <script>
+  <meta charset="UTF-8">
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BSLL7X39LD"></script>
+  <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-BSLL7X39LD');
-    </script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Circuit Design - Portfolio</title>
-    <link rel="stylesheet" href="styles.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connor Sorrell - Coursework Documentation</title>
-    <link rel="stylesheet" href="styles.css">
+  </script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connor Sorrell - Portfolio</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Connor Sorrell</h1>
-        <h2>Electrical & Computer Engineering</h2>
-        <h3>University of Colorado Boulder</h3>
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="logo">Connor Sorrell</div>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="electronics-design.html">Electronics Design</a></li>
+        <li><a href="circuit-design.html">Circuit Design</a></li>
+        <li><a href="programming-projects.html">Programming</a></li>
+        <li><a href="pcb-design.html">PCB Design</a></li>
+      </ul>
+    </nav>
+  </header>
 
-        <p>
-            This site serves as a documentation hub for my coursework. 
-            It includes reports, analyses, and technical documentation from courses I've completed, 
-            as well as select projects demonstrating applied skills.
-            It will be continuously updated.
-        </p>
-
-        <div class="course-buttons">
-            <a href="electronics-design.html" class="course-btn">Electronics Design</a>
-            <a href="circuit-design.html" class="course-btn">Circuit Design</a>
-            <a href="programming-projects.html" class="course-btn">Programming</a>
-            <a href="pcb-design.html" class="course-btn">PCB Design</a>
-        </div>
-
-        <p style="color: red; font-weight: bold; margin-top: 20px;">
-            ⚠️ This coursework documentation is a work in progress and will be updated as additional materials are compiled.
-        </p>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Electrical & Computer Engineering Portfolio</h1>
+      <h2>University of Colorado Boulder</h2>
+      <p>Showcasing technical projects, reports, and applied skills in circuit design, programming, and embedded systems.</p>
+      <a href="#projects" class="btn">Explore My Work</a>
     </div>
+  </section>
+
+  <!-- Projects Preview -->
+  <section id="projects" class="projects">
+    <h2>Featured Work</h2>
+    <div class="project-grid">
+      <div class="project-card">
+        <h3>Electronics Design</h3>
+        <p>Reports, labs, and design exercises in analog and digital electronics.</p>
+        <a href="electronics-design.html" class="card-btn">View</a>
+      </div>
+      <div class="project-card">
+        <h3>Circuit Design</h3>
+        <p>Coursework and simulations demonstrating applied circuit analysis and design.</p>
+        <a href="circuit-design.html" class="card-btn">View</a>
+      </div>
+      <div class="project-card">
+        <h3>Programming</h3>
+        <p>Projects in C, Python, and embedded systems including algorithms and applications.</p>
+        <a href="programming-projects.html" class="card-btn">View</a>
+      </div>
+      <div class="project-card">
+        <h3>PCB Design</h3>
+        <p>Board layouts, fabrication files, and documentation for hardware prototypes.</p>
+        <a href="pcb-design.html" class="card-btn">View</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 Connor Sorrell | <a href="https://github.com/">GitHub</a> | <a href="https://linkedin.com/">LinkedIn</a></p>
+  </footer>
 </body>
 </html>
